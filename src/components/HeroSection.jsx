@@ -41,9 +41,11 @@ export const HeroSection = () => {
             </div>
           </div>
 
-            <div className={`rounded-xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-2xl border-4 sm:border-8 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-orange-100'} h-40 sm:h-80 md:h-96 lg:max-w-5xl aspect-auto order-1 md:order-2`}>
+          {/* Right Visual - Imagem Realista */}
+          <div className={`rounded-xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-2xl border-4 sm:border-8 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-orange-100'} h-40 sm:h-80 md:h-96 lg:h-full order-1 md:order-2`}>
             <img
               src="BVjwvNJ5.png"
+              alt="Pessoas aprendendo a dirigir"
               className="w-full h-full object-cover"
             />
           </div>
