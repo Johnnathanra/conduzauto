@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Sun, Moon, Menu, X, LogIn } from 'lucide-react';
+import { Sun, Moon, LogIn, LogOut } from 'lucide-react';
 
 export const Header = () => {
   const { isDark, toggleTheme } = useTheme();
-  const [menuOpen, setMenuOpen] = useState(false);
-
+ 
   return (
     <header className={`${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-orange-100'} border-b sticky top-0 z-50 transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between px-3 sm:px-4 py-7">
