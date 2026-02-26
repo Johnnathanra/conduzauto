@@ -15,8 +15,12 @@ export const DashboardHeader = () => {
         
         {/* Logo - Esquerda */}
         <Link to="/dashboard" className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-base md:text-lg">CA</span>
+          <div className="flex items-center gap-2">
+          <img 
+                src="ConduzAuto.png" 
+                alt="ConduzAuto Logo" 
+                className="w-8 h-8 rounded-lg shadow-lg"
+          />
           </div>
           <span className={`font-bold text-sm md:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>ConduzAuto</span>
         </Link>

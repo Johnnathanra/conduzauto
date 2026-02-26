@@ -11,10 +11,16 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between px-3 sm:px-4 py-7">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg leading-none">
-            <span className="text-white font-bold text-xl">CA</span>
-          </div>
-          <span className={`font-bold text-base sm:text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}>ConduzAuto</span>
+        <img 
+            src="ConduzAuto.png" 
+            alt="ConduzAuto Logo" 
+            className="w-11 h-11 rounded-xl shadow-lg"
+        />
+        <img 
+             src={isDark ? 'ConduzAuto white.svg' : 'ConduzAuto gray.svg'} 
+             alt="ConduzAuto Logo" 
+            className="h-6 object-contain"
+       />
         </Link>
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-4">

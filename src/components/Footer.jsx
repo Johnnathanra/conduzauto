@@ -10,10 +10,16 @@ export const Footer = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Logo e Nome */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center leading-none">
-              <span className="text-white font-bold text-base">CA</span>
-            </div>
-            <span className="text-white font-bold sm:text-base">ConduzAuto</span>
+          <img 
+              src="ConduzAuto.png" 
+                alt="ConduzAuto Logo" 
+                className="w-8 h-8 rounded-lg shadow-lg"
+          />
+          <img 
+             src={isDark ? 'ConduzAuto white.svg' : 'ConduzAuto white.svg'} 
+             alt="ConduzAuto Logo" 
+            className="h-4 object-contain"
+          />
           </div>
 
           {/* Copyright */}

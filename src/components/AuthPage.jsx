@@ -99,19 +99,6 @@ export const AuthPage = () => {
           isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         } border rounded-xl p-8 max-w-md w-full shadow-2xl`}
       >
-        {/* Logo */}
-        <button
-          onClick={() => window.location.href = '/'}
-          className="flex items-center justify-center gap-2 w-full mb-8 bg-none border-none cursor-pointer"
-        >
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">CA</span>
-          </div>
-          <span className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            ConduzAuto
-          </span>
-        </button>
-
         {/* Heading */}
         <h2 className={`text-2xl font-bold text-center mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {isLogin ? 'Login' : 'Criar Conta'}

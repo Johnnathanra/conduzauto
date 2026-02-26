@@ -39,13 +39,19 @@ export const Sidebar = () => {
         {/* Logo */}
         <div className={`p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-2xl">CA</span>
+            <div className="flex items-center gap-2">
+            <img 
+                src="ConduzAuto.png" 
+                alt="ConduzAuto Logo" 
+                className="w-12 h-12 rounded-lg shadow-lg"
+            />
             </div>
             <div>
-              <h2 className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                ConduzAuto
-              </h2>
+            <img 
+             src={isDark ? 'ConduzAuto white.svg' : 'ConduzAuto gray.svg'} 
+             alt="ConduzAuto Logo" 
+            className="h-5 object-contain"
+            />
             </div>
           </div>
         </div>
