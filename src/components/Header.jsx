@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Sun, Moon, LogIn, LogOut } from 'lucide-react';
+import { Sun, Moon, LogIn } from 'lucide-react';
 
 export const Header = () => {
   const { isDark, toggleTheme } = useTheme();
