@@ -14,12 +14,12 @@ export const Header = () => {
         <img 
             src="ConduzAuto.png" 
             alt="ConduzAuto Logo" 
-            className="w-11 h-11 rounded-xl shadow-lg"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl shadow-lg"
         />
         <img 
              src={isDark ? 'ConduzAuto white.svg' : 'ConduzAuto gray.svg'} 
              alt="ConduzAuto Logo" 
-            className="h-6 object-contain"
+            className="h-4 sm:h-5 md:h-5 object-contain"
        />
         </Link>
         {/* Desktop Actions */}
