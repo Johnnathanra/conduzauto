@@ -25,7 +25,8 @@ export const HeroSection = () => {
 
             {/* Description */}
             <p className={`text-center md:text-left text-sm md:text-lg ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-8`}>
-                Aprenda a dirigir sem stress! Aulas práticas, simulados realistas e leis sempre atualizadas. Perfeito para quem está começando ou quer vencer o medo.
+                Dirija com segurança desde o início! Aulas de legislação, comando do veículo e técnicas de direção. 
+Estruturado para iniciantes e motoristas experientes que querem se aprimorar.
             </p>
 
             {/* CTA Button */}
