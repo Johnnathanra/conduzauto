@@ -10,7 +10,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('conduzauto_token');
+  // Procura pelo token do aluno ou do instrutor
+  const studentToken = localStorage.getItem('conduzauto_token');
+  const instructorToken = localStorage.getItem('instructor_token');
+  const token = instructorToken || studentToken;
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
