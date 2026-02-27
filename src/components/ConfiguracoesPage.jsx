@@ -47,16 +47,29 @@ export const ConfiguracoesPage = () => {
     await api.delete('/auth/delete-account');
     logout();
     
-    // Limpar localStorage
+    // Limpar localStorage - Token e User
     localStorage.removeItem('conduzauto_token');
     localStorage.removeItem('conduzauto_user');
+    
+    // ✅ Limpar dados de login salvos (Email e Senha encriptada)
+    localStorage.removeItem('conduzauto_remember_email');
+    localStorage.removeItem('conduzauto_remember_password');
+    localStorage.removeItem('conduzauto_remember_me');
+    
+    // Limpar outros dados
     localStorage.removeItem('conduzauto_email');
     localStorage.removeItem('conduzauto_password');
     localStorage.removeItem('conduzauto_remember_time');
     
-    setTimeout(() => navigate('/'), 1500);
+    setShowDeleteModal(false);
+    setSuccessMessage('✅ Conta deletada com sucesso! Todos os dados foram removidos.');
+    setShowSuccessModal(true);
+    
+    setTimeout(() => navigate('/'), 2000);
   } catch (err) {
     console.error('Erro ao deletar:', err);
+    setSuccessMessage('❌ Erro ao deletar a conta. Tente novamente.');
+    setShowSuccessModal(true);
   }
   setLoading(false);
 };
