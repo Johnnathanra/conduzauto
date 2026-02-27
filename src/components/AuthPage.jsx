@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -13,6 +13,7 @@ export const AuthPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,10 +22,21 @@ export const AuthPage = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
 
-  // Apenas limpar sessionStorage
-  React.useEffect(() => {
+  // Carregar email salvo ao iniciar (apenas se foi marcado "manter-me logado")
+  useEffect(() => {
     sessionStorage.removeItem('authMode');
-  }, []);
+    
+    // Carregar email salvo apenas no modo login
+    if (isLogin) {
+      const savedEmail = localStorage.getItem('conduzauto_remember_email');
+      const wasRemembered = localStorage.getItem('conduzauto_remember_me');
+      
+      if (savedEmail && wasRemembered === 'true') {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+    }
+  }, [isLogin]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,8 +47,17 @@ export const AuthPage = () => {
     const result = await login(email, password);
     
     if (result.success) {
+      // Se marcou "manter-me logado", salvar email
+      if (rememberMe) {
+        localStorage.setItem('conduzauto_remember_email', email);
+        localStorage.setItem('conduzauto_remember_me', 'true');
+      } else {
+        // Se desmarcou, limpar dados salvos
+        localStorage.removeItem('conduzauto_remember_email');
+        localStorage.removeItem('conduzauto_remember_me');
+      }
+      
       setSuccess('✅ Login realizado com sucesso!');
-      setEmail('');
       setPassword('');
       setTimeout(() => navigate('/dashboard'), 1500);
     } else {
@@ -64,7 +85,7 @@ export const AuthPage = () => {
 
     setLoading(true);
 
-    // ✅ Enviar como OBJETO (não como parâmetros separados)
+    // ✅ Enviar como OBJETO
     const result = await signup({
       name,
       email,
@@ -78,6 +99,7 @@ export const AuthPage = () => {
       setEmail('');
       setPassword('');
       setConfirmPassword('');
+      setRememberMe(false);
       setTimeout(() => navigate('/dashboard'), 2000);
     } else {
       setError(`❌ ${result.error}`);
@@ -94,6 +116,7 @@ export const AuthPage = () => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setRememberMe(false);
   };
 
   const inputField = `w-full px-4 py-2 rounded-lg border-2 ${
@@ -193,15 +216,33 @@ export const AuthPage = () => {
           </div>
 
           {isLogin && (
-            <div className="text-right">
-              <button
-                type="button"
-                onClick={() => alert('Funcionalidade de recuperação de senha em desenvolvimento!')}
-                className="text-orange-600 hover:text-orange-700 font-semibold text-sm"
-              >
-                Esqueci a senha
-              </button>
-            </div>
+            <>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 text-orange-600 rounded cursor-pointer"
+                />
+                <label
+                  htmlFor="rememberMe"
+                  className={`ml-2 text-sm cursor-pointer ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+                >
+                  Manter-me logado
+                </label>
+              </div>
+
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => alert('Funcionalidade de recuperação de senha em desenvolvimento!')}
+                  className="text-orange-600 hover:text-orange-700 font-semibold text-sm"
+                >
+                  Esqueci a senha
+                </button>
+              </div>
+            </>
           )}
 
           {!isLogin && (
