@@ -90,7 +90,7 @@ export const AulasPage = () => {
           </div>
 
           {/* Courses Grid - Melhorado para Mobile */}
-          <div className="grid grid-cols-1 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6">
             {filteredCourses.map(course => (
               <div
                 key={course.id}
