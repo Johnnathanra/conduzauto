@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { Eye, EyeOff, Trash2 } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 // Funções de encriptação/desencriptação com Base64
 const encryptData = (data) => {
-  return btoa(data);
+  return btoa(data); // Converte para Base64
 };
 
 const decryptData = (encryptedData) => {
   try {
-    return atob(encryptedData);
+    return atob(encryptedData); // Converte de Base64
   } catch (e) {
     return '';
   }
@@ -30,13 +30,12 @@ export const AuthPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-  const [hasRememberedData, setHasRememberedData] = useState(false);
 
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const { isDark } = useTheme();
 
-  // Carregar email e senha salvos ao iniciar
+  // Carregar email e senha salvos ao iniciar (apenas se foi marcado "manter-me logado")
   useEffect(() => {
     sessionStorage.removeItem('authMode');
     
@@ -48,7 +47,6 @@ export const AuthPage = () => {
       
       if (savedEmail && wasRemembered === 'true') {
         setEmail(savedEmail);
-        setHasRememberedData(true);
         
         // Desencriptar senha
         if (savedPassword) {
@@ -110,6 +108,7 @@ export const AuthPage = () => {
 
     setLoading(true);
 
+    // ✅ Enviar como OBJETO
     const result = await signup({
       name,
       email,
@@ -130,22 +129,6 @@ export const AuthPage = () => {
     }
     
     setLoading(false);
-  };
-
-  const handleClearRememberedData = () => {
-    if (window.confirm('Tem certeza que deseja limpar os dados salvos de login?')) {
-      localStorage.removeItem('conduzauto_remember_email');
-      localStorage.removeItem('conduzauto_remember_password');
-      localStorage.removeItem('conduzauto_remember_me');
-      
-      setEmail('');
-      setPassword('');
-      setRememberMe(false);
-      setHasRememberedData(false);
-      setSuccess('✅ Dados de login limpos com sucesso!');
-      
-      setTimeout(() => setSuccess(''), 3000);
-    }
   };
 
   const toggleMode = () => {
@@ -320,21 +303,6 @@ export const AuthPage = () => {
             {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar Conta'}
           </button>
         </form>
-
-        {/* Botão para Limpar Dados Salvos - Apenas em modo login */}
-        {isLogin && hasRememberedData && (
-          <button
-            onClick={handleClearRememberedData}
-            className={`w-full mt-4 py-2 px-4 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors text-sm ${
-              isDark
-                ? 'bg-red-900 text-red-200 hover:bg-red-800'
-                : 'bg-red-100 text-red-700 hover:bg-red-200'
-            }`}
-          >
-            <Trash2 className="w-4 h-4" />
-            Limpar Dados de Login
-          </button>
-        )}
 
         <p className={`text-center text-sm mt-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
           {isLogin ? 'Não tem conta?' : 'Já tem conta?'}{' '}
