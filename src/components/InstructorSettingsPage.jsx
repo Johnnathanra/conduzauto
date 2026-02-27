@@ -66,12 +66,10 @@ export const InstructorSettingsPage = () => {
     setSuccessMessage('✅ Conta deletada com sucesso! Todos os dados foram removidos.');
     setShowSuccessModal(true);
 
-    // ✅ Recarregar a página após 2 segundos
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 1000);
+    // ✅ Recarregar imediatamente (sem delay)
+    window.location.href = '/';
   } catch (err) {
-    console.error('Erro ao deletar:', err);
+  console.error('Erro ao deletar:', err);
     setSuccessMessage('❌ Erro ao deletar a conta. Tente novamente.');
     setShowSuccessModal(true);
   }
