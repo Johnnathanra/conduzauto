@@ -4,6 +4,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { Eye, EyeOff } from 'lucide-react';
 
+// Funções de encriptação/desencriptação com Base64
+const encryptData = (data) => {
+  return btoa(data); // Converte para Base64
+};
+
+const decryptData = (encryptedData) => {
+  try {
+    return atob(encryptedData); // Converte de Base64
+  } catch (e) {
+    return '';
+  }
+};
+
 export const AuthPage = () => {
   const authMode = sessionStorage.getItem('authMode') || 'login';
   const [isLogin, setIsLogin] = useState(authMode === 'login');
@@ -22,17 +35,25 @@ export const AuthPage = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
 
-  // Carregar email salvo ao iniciar (apenas se foi marcado "manter-me logado")
+  // Carregar email e senha salvos ao iniciar (apenas se foi marcado "manter-me logado")
   useEffect(() => {
     sessionStorage.removeItem('authMode');
     
-    // Carregar email salvo apenas no modo login
+    // Carregar dados salvos apenas no modo login
     if (isLogin) {
       const savedEmail = localStorage.getItem('conduzauto_remember_email');
+      const savedPassword = localStorage.getItem('conduzauto_remember_password');
       const wasRemembered = localStorage.getItem('conduzauto_remember_me');
       
       if (savedEmail && wasRemembered === 'true') {
         setEmail(savedEmail);
+        
+        // Desencriptar senha
+        if (savedPassword) {
+          const decryptedPassword = decryptData(savedPassword);
+          setPassword(decryptedPassword);
+        }
+        
         setRememberMe(true);
       }
     }
@@ -47,13 +68,15 @@ export const AuthPage = () => {
     const result = await login(email, password);
     
     if (result.success) {
-      // Se marcou "manter-me logado", salvar email
+      // Se marcou "manter-me logado", salvar email e senha encriptada
       if (rememberMe) {
         localStorage.setItem('conduzauto_remember_email', email);
+        localStorage.setItem('conduzauto_remember_password', encryptData(password));
         localStorage.setItem('conduzauto_remember_me', 'true');
       } else {
         // Se desmarcou, limpar dados salvos
         localStorage.removeItem('conduzauto_remember_email');
+        localStorage.removeItem('conduzauto_remember_password');
         localStorage.removeItem('conduzauto_remember_me');
       }
       
