@@ -69,24 +69,24 @@ export const AulasPage = () => {
               />
             </div>
 
-            {/* Category Filters */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {categories.map(category => (
-                <button
-                  key={category}
-                  onClick={() => setFilterCategory(category)}
-                  className={`px-3 sm:px-4 py-2 rounded-full whitespace-nowrap font-medium text-xs sm:text-sm transition-colors flex-shrink-0 ${
-                    filterCategory === category
-                      ? 'bg-orange-600 text-white'
-                      : isDark
-                      ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+            {/* Category Filters - Responsivo */}
+            <div className="flex flex-wrap gap-2 md:gap-3">
+            {categories.map(category => (
+            <button
+                 key={category}
+                 onClick={() => setFilterCategory(category)}
+                 className={`px-3 sm:px-4 md:px-5 py-2 rounded-full whitespace-nowrap font-medium text-xs sm:text-sm md:text-base transition-colors ${
+                 filterCategory === category
+                 ? 'bg-orange-600 text-white'
+                 : isDark
+                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+          {category}
+          </button>
+          ))}
+           </div>
           </div>
 
           {/* Courses Grid - Melhorado para Mobile */}
