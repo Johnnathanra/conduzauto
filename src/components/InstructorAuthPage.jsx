@@ -150,15 +150,6 @@ export const InstructorAuthPage = () => {
     setRememberMe(false);
   };
 
-  const clearSavedLogin = () => {
-    localStorage.removeItem('instructor_remember_email');
-    localStorage.removeItem('instructor_remember_password');
-    localStorage.removeItem('instructor_remember_me');
-    setEmail('');
-    setPassword('');
-    setRememberMe(false);
-  };
-
   const inputField = `w-full px-4 py-2 rounded-lg border-2 ${
     isDark
       ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
@@ -272,16 +263,6 @@ export const InstructorAuthPage = () => {
                   Manter-me logado
                 </label>
               </div>
-
-              {rememberMe && (
-                <button
-                  type="button"
-                  onClick={clearSavedLogin}
-                  className="text-orange-600 hover:text-orange-700 font-semibold text-sm w-full text-left"
-                >
-                  Limpar dados salvos
-                </button>
-              )}
 
               <div className="text-right">
                 <button
