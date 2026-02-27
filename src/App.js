@@ -2,9 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { InstructorProvider, useInstructor } from './contexts/InstructorContext';
 import { CoursesProvider } from './contexts/CoursesContext';
 
-// Importar componentes com named exports
+// Componentes públicos
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HeroSection } from './components/HeroSection';
@@ -13,31 +14,79 @@ import { PricingSection } from './components/PricingSection';
 import { FAQSection } from './components/FAQSection';
 import { CTASection } from './components/CTASection';
 import { AuthPage } from './components/AuthPage';
+
+// Componentes de aluno
+import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { AulasPage } from './components/AulasPage';
 import { SimuladosPage } from './components/SimuladosPage';
 import { EstatisticasPage } from './components/EstatisticasPage';
 import { ConfiguracoesPage } from './components/ConfiguracoesPage';
-import { Sidebar } from './components/Sidebar';
 
+// Componentes de instrutor
+import { InstructorSidebar } from './components/InstructorSidebar';
+import { InstructorAuthPage } from './components/InstructorAuthPage';
+import { InstructorDashboard } from './components/InstructorDashboard';
+import { InstructorSettingsPage } from './components/InstructorSettingsPage';
+
+// Rota protegida para alunos
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
   }
-  
+
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
-  
+
+  return children;
+}
+
+// Rota protegida para instrutores
+function ProtectedInstructorRoute({ children }) {
+  const { instructor, loading } = useInstructor();
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
+  }
+
+  if (!instructor) {
+    return <Navigate to="/instructor/auth" replace />;
+  }
+
   return children;
 }
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, loading: studentLoading } = useAuth();
+  const { instructor, loading: instructorLoading } = useInstructor();
 
-  // Se usuário está logado, mostrar dashboard com rotas protegidas
+  const loading = studentLoading || instructorLoading;
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
+  }
+
+  // Se instrutor está logado, mostrar dashboard do instrutor
+  if (instructor) {
+    return (
+      <div className="flex">
+        <InstructorSidebar />
+        <main className="flex-1 md:ml-64">
+          <Routes>
+            <Route path="/instructor/dashboard" element={<ProtectedInstructorRoute><InstructorDashboard /></ProtectedInstructorRoute>} />
+            <Route path="/instructor/settings" element={<ProtectedInstructorRoute><InstructorSettingsPage /></ProtectedInstructorRoute>} />
+            <Route path="/instructor/auth" element={<InstructorAuthPage />} />
+            <Route path="*" element={<Navigate to="/instructor/dashboard" replace />} />
+          </Routes>
+        </main>
+      </div>
+    );
+  }
+
+  // Se aluno está logado, mostrar dashboard do aluno
   if (user) {
     return (
       <div className="flex">
@@ -49,6 +98,7 @@ function AppContent() {
             <Route path="/simulados" element={<ProtectedRoute><SimuladosPage /></ProtectedRoute>} />
             <Route path="/estatisticas" element={<ProtectedRoute><EstatisticasPage /></ProtectedRoute>} />
             <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
+            <Route path="/auth" element={<AuthPage defaultMode="login" />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
@@ -56,7 +106,7 @@ function AppContent() {
     );
   }
 
-  // Se não está logado, mostrar home
+  // Se não está logado, mostrar home pública
   return (
     <>
       <Header />
@@ -74,6 +124,7 @@ function AppContent() {
           }
         />
         <Route path="/auth" element={<AuthPage defaultMode="login" />} />
+        <Route path="/instructor/auth" element={<InstructorAuthPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
@@ -86,9 +137,11 @@ function App() {
     <ThemeProvider>
       <CoursesProvider>
         <AuthProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <InstructorProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </InstructorProvider>
         </AuthProvider>
       </CoursesProvider>
     </ThemeProvider>
