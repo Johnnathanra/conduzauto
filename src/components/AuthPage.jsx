@@ -29,12 +29,15 @@ export const AuthPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     const result = await login(email, password);
     
     if (result.success) {
       setSuccess('✅ Login realizado com sucesso!');
+      setEmail('');
+      setPassword('');
       setTimeout(() => navigate('/dashboard'), 1500);
     } else {
       setError(`❌ ${result.error}`);
@@ -46,13 +49,36 @@ export const AuthPage = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    // Validações
+    if (password !== confirmPassword) {
+      setError('❌ As senhas não correspondem!');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('❌ A senha deve ter pelo menos 6 caracteres!');
+      return;
+    }
+
     setLoading(true);
 
-    const result = await signup(name, email, password, confirmPassword);
+    // ✅ Enviar como OBJETO (não como parâmetros separados)
+    const result = await signup({
+      name,
+      email,
+      password,
+      confirmPassword
+    });
     
     if (result.success) {
       setSuccess('✅ Cadastro realizado com sucesso!');
-      setTimeout(() => navigate('/dashboard'), 1500);
+      setName('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setTimeout(() => navigate('/dashboard'), 2000);
     } else {
       setError(`❌ ${result.error}`);
     }
@@ -189,7 +215,7 @@ export const AuthPage = () => {
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={inputField}
+                  className={`${inputField} pr-10`}
                   required={!isLogin}
                 />
                 <button
