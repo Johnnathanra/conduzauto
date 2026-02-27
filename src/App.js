@@ -65,12 +65,17 @@ function AppContent() {
 
   const loading = studentLoading || instructorLoading;
 
+  console.log('📊 [AppContent] user:', user ? 'Logado' : 'Não logado');
+  console.log('📊 [AppContent] instructor:', instructor ? 'Logado' : 'Não logado');
+  console.log('📊 [AppContent] loading:', loading);
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Carregando...</div>;
   }
 
   // Se instrutor está logado, mostrar dashboard do instrutor
   if (instructor) {
+    console.log('🎓 [AppContent] Renderizando dashboard do instrutor');
     return (
       <div className="flex">
         <InstructorSidebar />
@@ -88,6 +93,7 @@ function AppContent() {
 
   // Se aluno está logado, mostrar dashboard do aluno
   if (user) {
+    console.log('👨 [AppContent] Renderizando dashboard do aluno');
     return (
       <div className="flex">
         <Sidebar />
@@ -107,6 +113,7 @@ function AppContent() {
   }
 
   // Se não está logado, mostrar home pública
+  console.log('🏠 [AppContent] Renderizando home pública');
   return (
     <>
       <Header />
