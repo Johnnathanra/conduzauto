@@ -24,7 +24,7 @@ export const HeroSection = () => {
             </div>
 
             {/* Description */}
-            <p className={`text-center md:text-left text-sm md:text-lg ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-8`}>
+            <p className={`text-center md:text-left text-sm md:text-base ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-8`}>
                 Dirija com segurança desde o início! Aulas de legislação, comando do veículo e técnicas de direção. 
 Estruturado para iniciantes e motoristas experientes que querem se aprimorar.
             </p>
@@ -34,7 +34,7 @@ Estruturado para iniciantes e motoristas experientes que querem se aprimorar.
               <Link 
                 to="/auth"
                 onClick={() => sessionStorage.setItem('authMode', 'signup')}
-                className="inline-flex bg-orange-600 hover:bg-orange-700 text-white font-bold py-5 px-20 sm:py-5 sm:px-20 rounded-lg items-center gap-3 transition-all hover:shadow-lg text-base sm:text-xl whitespace-nowrap"
+                className="inline-flex bg-orange-600 hover:bg-orange-700 text-white font-bold py-5 px-20 sm:py-5 sm:px-12 rounded-lg items-center gap-3 transition-all hover:shadow-lg text-base sm:text-xl whitespace-nowrap"
               >
                 Começar Agora
                 <ArrowRight className="w-3 sm:w-5 h-3 sm:h-5" />

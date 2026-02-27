@@ -21,7 +21,7 @@ export const BenefitsSection = () => {
           Por que escolher ConduzAuto?
         </h2>
         <p className={`text-center text-xs sm:text-base mb-6 sm:mb-12 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Plataforma completa para aprender a dirigir com segurança e confiança
+          Plataforma completa para você aprender e também à dirigir com segurança e confiança.
         </p>
         
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-6 md:gap-8">
