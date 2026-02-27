@@ -43,14 +43,14 @@ export const HeroSection = () => {
 
           {/* Right Visual - Imagem Responsiva e Centralizada */}
           <div className="order-1 md:order-2 flex justify-center md:justify-end">
-            <div className={`rounded-xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-2xl border-4 sm:border-8 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-orange-100'} w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg h-auto aspect-video`}>
-              <img
-                src="BVjwvNJ5.png"
-                alt="Aprenda a Conduzir Bem"
-                className="w-full h-full object-cover"
-              />
-            </div>
+          <div className={`rounded-xl sm:rounded-3xl overflow-hidden shadow-lg sm:shadow-2xl border-4 sm:border-8 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-orange-100'} w-full max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl h-auto aspect-video`}>
+          <img
+               src="BVjwvNJ5.png"
+               alt="Aprenda a Conduzir Bem"
+               className="w-full h-full object-cover"
+          />
           </div>
+         </div>
         </div>
       </div>
     </section>
