@@ -43,12 +43,12 @@ export const InstructorSidebar = () => {
             <img
               src="/ConduzAuto.png"
               alt="Logo"
-              className="w-11 h-11 rounded-lg shadow-lg"
+              className="w-10 h-10 rounded-lg shadow-lg"
             />
             <img
               src={isDark ? '/ConduzAuto white.svg' : '/ConduzAuto gray.svg'}
               alt="ConduzAuto"
-              className="h-5 object-contain"
+              className="h-4 object-contain"
             />
           </div>
         </div>

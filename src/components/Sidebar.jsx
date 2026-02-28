@@ -52,8 +52,8 @@ export const Sidebar = () => {
         {/* Logo */}
         <div className={`p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex items-center gap-3">
-            <img src="/ConduzAuto.png" alt="ConduzAuto Logo" className="w-11 h-11 rounded-lg shadow-lg" />
-            <img src={isDark ? '/ConduzAuto white.svg' : '/ConduzAuto gray.svg'} alt="ConduzAuto" className="h-5 object-contain" />
+            <img src="/ConduzAuto.png" alt="ConduzAuto Logo" className="w-10 h-10 rounded-lg shadow-lg" />
+            <img src={isDark ? '/ConduzAuto white.svg' : '/ConduzAuto gray.svg'} alt="ConduzAuto" className="h-4 object-contain" />
           </div>
         </div>
 

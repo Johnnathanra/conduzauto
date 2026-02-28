@@ -36,28 +36,28 @@ export const AuthPage = () => {
   const { isDark } = useTheme();
 
   // Carregar email e senha salvos ao iniciar (apenas se foi marcado "manter-me logado")
-  useEffect(() => {
-    sessionStorage.removeItem('authMode');
+useEffect(() => {
+  sessionStorage.removeItem('authMode');
+  
+  // Carregar dados salvos apenas no modo login
+  if (isLogin) {
+    const savedEmail = localStorage.getItem('conduzauto_remember_email');
+    const savedPassword = localStorage.getItem('conduzauto_remember_password');
+    const wasRemembered = localStorage.getItem('conduzauto_remember_me');
     
-    // Carregar dados salvos apenas no modo login
-    if (isLogin) {
-      const savedEmail = localStorage.getItem('conduzauto_remember_email');
-      const savedPassword = localStorage.getItem('conduzauto_remember_password');
-      const wasRemembered = localStorage.getItem('conduzauto_remember_me');
+    if (savedEmail && wasRemembered === 'true') {
+      setEmail(savedEmail);
       
-      if (savedEmail && wasRemembered === 'true') {
-        setEmail(savedEmail);
-        
-        // Desencriptar senha
-        if (savedPassword) {
-          const decryptedPassword = decryptData(savedPassword);
-          setPassword(decryptedPassword);
-        }
-        
-        setRememberMe(true);
+      // Desencriptar senha
+      if (savedPassword) {
+        const decryptedPassword = decryptData(savedPassword);
+        setPassword(decryptedPassword);
       }
+      
+      setRememberMe(true);
     }
-  }, [isLogin]);
+  }
+}, [isLogin]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -73,6 +73,7 @@ export const AuthPage = () => {
         localStorage.setItem('conduzauto_remember_email', email);
         localStorage.setItem('conduzauto_remember_password', encryptData(password));
         localStorage.setItem('conduzauto_remember_me', 'true');
+        console.log('💾 [AuthPage] Dados salvos para "manter-me logado"');
       } else {
         // Se desmarcou, limpar dados salvos
         localStorage.removeItem('conduzauto_remember_email');
@@ -82,7 +83,7 @@ export const AuthPage = () => {
       
       setSuccess('✅ Login realizado com sucesso!');
       setPassword('');
-      setTimeout(() => navigate('/dashboard'), 100);
+      setTimeout(() => navigate('/dashboard'), 300);
     } else {
       setError(`❌ ${result.error}`);
     }
@@ -123,7 +124,7 @@ export const AuthPage = () => {
       setPassword('');
       setConfirmPassword('');
       setRememberMe(false);
-      setTimeout(() => navigate('/dashboard'), 100);
+      setTimeout(() => navigate('/dashboard'), 300);
     } else {
       setError(`❌ ${result.error}`);
     }
