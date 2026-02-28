@@ -178,6 +178,8 @@ export const InstructorDashboard = () => {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Main Content */}
+      <div className="md:ml-0 pt-20 md:pt-0"></div>
       {/* Header */}
       <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b p-6 sticky top-0 z-10`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
