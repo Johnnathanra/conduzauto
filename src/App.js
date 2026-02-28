@@ -86,7 +86,7 @@ function AppContent() {
   // 🔴 NÃO renderize NADA enquanto carrega
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
           <p className="mt-4 text-gray-600">Carregando...</p>
@@ -95,7 +95,7 @@ function AppContent() {
     );
   }
 
-  // Se instrutor está logado, mostrar dashboard do instrutor
+  // Se instrutor está logado
   if (instructor) {
     console.log('🎓 [AppContent] Renderizando dashboard do instrutor');
     return (
@@ -103,8 +103,8 @@ function AppContent() {
         <InstructorSidebar />
         <main className="flex-1 md:ml-64">
           <Routes>
-            <Route path="/instructor/dashboard" element={<ProtectedInstructorRoute><InstructorDashboard /></ProtectedInstructorRoute>} />
-            <Route path="/instructor/settings" element={<ProtectedInstructorRoute><InstructorSettingsPage /></ProtectedInstructorRoute>} />
+            <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
+            <Route path="/instructor/settings" element={<InstructorSettingsPage />} />
             <Route path="/instructor/auth" element={<InstructorAuthPage />} />
             <Route path="*" element={<Navigate to="/instructor/dashboard" replace />} />
           </Routes>
@@ -113,7 +113,7 @@ function AppContent() {
     );
   }
 
-  // Se aluno está logado, mostrar dashboard do aluno
+  // Se aluno está logado
   if (user) {
     console.log('👨 [AppContent] Renderizando dashboard do aluno');
     return (
@@ -121,11 +121,11 @@ function AppContent() {
         <Sidebar />
         <main className="flex-1 md:ml-64">
           <Routes>
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/aulas" element={<ProtectedRoute><AulasPage /></ProtectedRoute>} />
-            <Route path="/simulados" element={<ProtectedRoute><SimuladosPage /></ProtectedRoute>} />
-            <Route path="/estatisticas" element={<ProtectedRoute><EstatisticasPage /></ProtectedRoute>} />
-            <Route path="/configuracoes" element={<ProtectedRoute><ConfiguracoesPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/aulas" element={<AulasPage />} />
+            <Route path="/simulados" element={<SimuladosPage />} />
+            <Route path="/estatisticas" element={<EstatisticasPage />} />
+            <Route path="/configuracoes" element={<ConfiguracoesPage />} />
             <Route path="/auth" element={<AuthPage defaultMode="login" />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
@@ -134,7 +134,7 @@ function AppContent() {
     );
   }
 
-  // Se não está logado, mostrar home pública
+  // Se não está logado
   console.log('🏠 [AppContent] Renderizando home pública');
   return (
     <>
