@@ -2,7 +2,6 @@ import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
 import { Link } from 'react-router-dom';
 import { LogOut, Star, Zap, BookOpen, Clock } from 'lucide-react';
 
@@ -86,8 +85,6 @@ export const Dashboard = () => {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <Sidebar />
-
       {/* Main Content */}
       <div className="md:ml-0 pt-20 md:pt-0">
         
@@ -262,8 +259,8 @@ export const Dashboard = () => {
                 to="/aulas"
                 className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-8 rounded-lg transition-all"
               >
-               Ir para Aulas
-             </Link>
+                Ir para Aulas
+              </Link>
             </div>
           )}
         </div>
@@ -271,3 +268,5 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+export default Dashboard;

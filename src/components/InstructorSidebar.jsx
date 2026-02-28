@@ -38,20 +38,21 @@ export const InstructorSidebar = () => {
         } md:translate-x-0 z-40 pt-20 md:pt-0 flex flex-col`}
       >
         {/* Logo */}
-<div className={`p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-  <div className="flex items-center gap-3">
-    <img
-      src="/ConduzAuto.png"
-      alt="Logo"
-      className="w-11 h-11 rounded-lg shadow-lg"
-    />
-    <img
-      src={isDark ? '/ConduzAuto white.svg' : '/ConduzAuto gray.svg'}
-      alt="ConduzAuto"
-      className="h-5 object-contain"
-    />
-  </div>
-</div>
+        <div className={`p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-3">
+            <img
+              src="/ConduzAuto.png"
+              alt="Logo"
+              className="w-11 h-11 rounded-lg shadow-lg"
+            />
+            <img
+              src={isDark ? '/ConduzAuto white.svg' : '/ConduzAuto gray.svg'}
+              alt="ConduzAuto"
+              className="h-5 object-contain"
+            />
+          </div>
+        </div>
+
         {/* Menu Items */}
         <nav className="flex-1 px-4 py-6 space-y-2">
           {menuItems.map((item) => (
@@ -101,15 +102,15 @@ export const InstructorSidebar = () => {
             Sair
           </button>
         </div>
-
-        {/* Overlay Mobile */}
-        {open && (
-          <div
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 bg-black/50 md:hidden z-30"
-          />
-        )}
       </aside>
+
+      {/* Mobile overlay - FORA da sidebar */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 bg-black/50 md:hidden z-30"
+        />
+      )}
     </>
   );
 };
