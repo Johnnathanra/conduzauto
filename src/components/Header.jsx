@@ -12,12 +12,12 @@ export const Header = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <img 
-            src="ConduzAuto.png" 
+            src="/ConduzAuto.png" 
             alt="ConduzAuto Logo" 
             className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl shadow-lg"
           />
           <img 
-            src={isDark ? 'ConduzAuto white.svg' : 'ConduzAuto gray.svg'} 
+            src={isDark ? '/ConduzAuto white.svg' : '/ConduzAuto gray.svg'} 
             alt="ConduzAuto Logo" 
             className="h-4 sm:h-5 md:h-5 object-contain"
           />
