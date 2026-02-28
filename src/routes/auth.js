@@ -9,6 +9,9 @@ router.post('/register', authController.register);
 // Login
 router.post('/login', authController.login);
 
+// ✅ NOVA ROTA - Carregar perfil do usuário
+router.get('/profile', authenticateToken, authController.getProfile);
+
 // Deletar conta (protegido)
 router.delete('/delete-account', authenticateToken, authController.deleteAccount);
 
