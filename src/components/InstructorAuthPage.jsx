@@ -83,7 +83,7 @@ export const InstructorAuthPage = () => {
 
       setSuccess('✅ Login realizado com sucesso!');
       setPassword('');
-      setTimeout(() => navigate('/instructor/dashboard'), 1500);
+      setTimeout(() => navigate('/instructor/dashboard'), 100);
     } else {
       setError(`❌ ${result.error}`);
     }
@@ -130,7 +130,7 @@ export const InstructorAuthPage = () => {
       setConfirmPassword('');
       setBio('');
       setRememberMe(false);
-      setTimeout(() => navigate('/instructor/dashboard'), 2000);
+      setTimeout(() => navigate('/instructor/dashboard'), 100);
     } else {
       setError(`❌ ${result.error}`);
     }

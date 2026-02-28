@@ -82,7 +82,7 @@ export const AuthPage = () => {
       
       setSuccess('✅ Login realizado com sucesso!');
       setPassword('');
-      setTimeout(() => navigate('/dashboard'), 1500);
+      setTimeout(() => navigate('/dashboard'), 100);
     } else {
       setError(`❌ ${result.error}`);
     }
@@ -123,7 +123,7 @@ export const AuthPage = () => {
       setPassword('');
       setConfirmPassword('');
       setRememberMe(false);
-      setTimeout(() => navigate('/dashboard'), 2000);
+      setTimeout(() => navigate('/dashboard'), 100);
     } else {
       setError(`❌ ${result.error}`);
     }
