@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useStudent } from '../contexts/StudentContext';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TrendingUp, Calendar, Target, Flame } from 'lucide-react';
 
 export const EstatisticasPage = () => {
   const { isDark } = useTheme();
-  const { user } = useAuth();
+  const { user } = useStudent();
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('week');
 

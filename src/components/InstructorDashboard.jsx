@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useInstructor } from '../contexts/InstructorContext';
-import { useNavigate } from 'react-router-dom';
-import { Search, Star, Eye, Edit, Trash2, Plus, X, LogOut } from 'lucide-react';
-import api from '../api';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Search, Star, Eye, Edit, Trash2, Plus, X, LogOut, Users, BarChart3, TrendingUp, Gift } from 'lucide-react';
+import InstructorStudentsManager from './InstructorStudentsManager';
+import InvitationModal from './InvitationModal';
 
 export const InstructorDashboard = () => {
   const { isDark } = useTheme();
   const { instructor, logoutInstructor } = useInstructor();
   const navigate = useNavigate();
+  const location = useLocation();
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [evaluations, setEvaluations] = useState([]);
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [editingEvaluation, setEditingEvaluation] = useState(null);
+  const [showStudentsManager, setShowStudentsManager] = useState(false);
+  const [showInvitationModal, setShowInvitationModal] = useState(false);
 
   // Formulário de avaliação
   const [evaluationForm, setEvaluationForm] = useState({
@@ -28,13 +32,121 @@ export const InstructorDashboard = () => {
     improvementSuggestions: '',
   });
 
+  // Dados fictícios de alunos
+  const mockStudents = [
+    {
+      _id: '1',
+      name: 'João Silva',
+      email: 'joao@example.com',
+      level: 2,
+      totalXP: 2500,
+      coursesCompleted: 3,
+      hoursLearned: 45,
+    },
+    {
+      _id: '2',
+      name: 'Maria Santos',
+      email: 'maria@example.com',
+      level: 3,
+      totalXP: 4200,
+      coursesCompleted: 5,
+      hoursLearned: 72,
+    },
+    {
+      _id: '3',
+      name: 'Pedro Costa',
+      email: 'pedro@example.com',
+      level: 1,
+      totalXP: 1200,
+      coursesCompleted: 1,
+      hoursLearned: 18,
+    },
+    {
+      _id: '4',
+      name: 'Ana Oliveira',
+      email: 'ana@example.com',
+      level: 4,
+      totalXP: 6800,
+      coursesCompleted: 8,
+      hoursLearned: 110,
+    },
+    {
+      _id: '5',
+      name: 'Carlos Ferreira',
+      email: 'carlos@example.com',
+      level: 2,
+      totalXP: 3100,
+      coursesCompleted: 4,
+      hoursLearned: 58,
+    },
+  ];
+
+  // Dados fictícios de avaliações
+  const mockEvaluations = {
+    '1': [
+      {
+        _id: 'eval1',
+        studentId: '1',
+        courseLesson: 'Fundamentos de Direção',
+        rating: 4.5,
+        concept: 'Bom',
+        feedback: 'Excelente desempenho nas práticas de estacionamento.',
+        improvementSuggestions: 'Trabalhar mais na mudança de faixas em alta velocidade.',
+        evaluatedAt: new Date('2024-02-20'),
+      },
+      {
+        _id: 'eval2',
+        studentId: '1',
+        courseLesson: 'Legislação de Trânsito',
+        rating: 4,
+        concept: 'Bom',
+        feedback: 'Bom conhecimento das leis.',
+        improvementSuggestions: 'Revisar sinalizações menos comuns.',
+        evaluatedAt: new Date('2024-02-15'),
+      },
+    ],
+    '2': [
+      {
+        _id: 'eval3',
+        studentId: '2',
+        courseLesson: 'Direção Defensiva',
+        rating: 5,
+        concept: 'Excelente',
+        feedback: 'Aluno destaque da turma! Aplicação exemplar de técnicas defensivas.',
+        improvementSuggestions: 'Considerar como monitor para futuras turmas.',
+        evaluatedAt: new Date('2024-02-18'),
+      },
+    ],
+    '3': [
+      {
+        _id: 'eval4',
+        studentId: '3',
+        courseLesson: 'Fundamentos de Direção',
+        rating: 3,
+        concept: 'Satisfatório',
+        feedback: 'Desempenho aceitável, mas precisa de mais prática.',
+        improvementSuggestions: 'Aumentar o tempo de prática, especialmente em manobras.',
+        evaluatedAt: new Date('2024-02-17'),
+      },
+    ],
+  };
+
   useEffect(() => {
     if (!instructor) {
       navigate('/instructor/auth');
       return;
     }
-    fetchStudents();
-  }, [instructor, navigate]);
+    // Usar dados fictícios
+    setStudents(mockStudents);
+    setFilteredStudents(mockStudents);
+    setLoading(false);
+    
+    // Abrir modal se vindo do Header
+    if (location.state?.openStudentsManager) {
+      setShowStudentsManager(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [instructor, navigate, location.state]);
 
   useEffect(() => {
     const filtered = students.filter(student =>
@@ -44,31 +156,9 @@ export const InstructorDashboard = () => {
     setFilteredStudents(filtered);
   }, [searchTerm, students]);
 
-  const fetchStudents = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('instructor_token');
-      const response = await api.get('/instructor/students', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setStudents(response.data);
-    } catch (err) {
-      console.error('Erro ao buscar alunos:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchStudentEvaluations = async (studentId) => {
-    try {
-      const token = localStorage.getItem('instructor_token');
-      const response = await api.get(`/instructor/student/${studentId}/evaluations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setEvaluations(response.data);
-    } catch (err) {
-      console.error('Erro ao buscar avaliações:', err);
-    }
+  const fetchStudentEvaluations = (studentId) => {
+    const mockData = mockEvaluations[studentId] || [];
+    setEvaluations(mockData);
   };
 
   const handleOpenEvaluation = (student) => {
@@ -97,27 +187,19 @@ export const InstructorDashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem('instructor_token');
-      
-      if (editingEvaluation) {
-        await api.put(
-          `/instructor/evaluate/${editingEvaluation._id}`,
-          evaluationForm,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        alert('✅ Avaliação atualizada com sucesso!');
-      } else {
-        await api.post(
-          '/instructor/evaluate',
-          {
-            studentId: selectedStudent._id,
-            ...evaluationForm,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        alert('✅ Avaliação criada com sucesso!');
-      }
+      const newEvaluation = {
+        _id: `eval${Date.now()}`,
+        studentId: selectedStudent._id,
+        ...evaluationForm,
+        evaluatedAt: new Date(),
+      };
 
+      if (!mockEvaluations[selectedStudent._id]) {
+        mockEvaluations[selectedStudent._id] = [];
+      }
+      mockEvaluations[selectedStudent._id].push(newEvaluation);
+
+      alert('✅ Avaliação criada com sucesso!');
       setShowEvaluationModal(false);
       fetchStudentEvaluations(selectedStudent._id);
     } catch (err) {
@@ -126,13 +208,14 @@ export const InstructorDashboard = () => {
     }
   };
 
-  const handleDeleteEvaluation = async (evaluationId) => {
+  const handleDeleteEvaluation = (evaluationId) => {
     if (window.confirm('Tem certeza que deseja deletar esta avaliação?')) {
       try {
-        const token = localStorage.getItem('instructor_token');
-        await api.delete(`/instructor/evaluate/${evaluationId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (mockEvaluations[selectedStudent._id]) {
+          mockEvaluations[selectedStudent._id] = mockEvaluations[selectedStudent._id].filter(
+            e => e._id !== evaluationId
+          );
+        }
         alert('✅ Avaliação deletada com sucesso!');
         fetchStudentEvaluations(selectedStudent._id);
       } catch (err) {
@@ -145,15 +228,15 @@ export const InstructorDashboard = () => {
   const getConceptColor = (concept) => {
     switch (concept) {
       case 'Excelente':
-        return 'bg-green-100 text-green-800';
+        return isDark ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800';
       case 'Bom':
-        return 'bg-blue-100 text-blue-800';
+        return isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800';
       case 'Satisfatório':
-        return 'bg-yellow-100 text-yellow-800';
+        return isDark ? 'bg-yellow-900 text-yellow-200' : 'bg-yellow-100 text-yellow-800';
       case 'Insuficiente':
-        return 'bg-red-100 text-red-800';
+        return isDark ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -169,18 +252,23 @@ export const InstructorDashboard = () => {
       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
   }`;
 
-  const primaryButton = `bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-all`;
+  const primaryButton = `bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-all`;
 
   const handleLogout = () => {
     logoutInstructor();
     navigate('/instructor/auth');
   };
 
+  const totalStudents = students.length;
+  const totalEvaluations = Object.values(mockEvaluations).reduce((sum, evals) => sum + evals.length, 0);
+  const averageRating = evaluations.length > 0
+    ? (evaluations.reduce((sum, e) => sum + e.rating, 0) / evaluations.length).toFixed(1)
+    : 0;
+
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Main Content */}
       <div className="md:ml-0 pt-20 md:pt-0"></div>
-      {/* Header */}
+      
       <div className={`${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b p-6 sticky top-0 z-10`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
@@ -201,9 +289,63 @@ export const InstructorDashboard = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Search Bar */}
+        <div className="mb-8 flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => setShowStudentsManager(true)}
+            className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-all"
+          >
+            <Users className="w-4 h-4" />
+            Gerenciar Alunos
+          </button>
+          <button
+            onClick={() => setShowInvitationModal(true)}
+            className="flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-all"
+            title="Gerar links de convite para alunos"
+          >
+            <Gift className="w-4 h-4" />
+            Gerar Convite
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className={`rounded-lg p-6 ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Total de Alunos</p>
+                <h3 className={`text-3xl font-bold mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {totalStudents}
+                </h3>
+              </div>
+              <Users className="w-12 h-12 text-orange-600" />
+            </div>
+          </div>
+
+          <div className={`rounded-lg p-6 ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Total de Avaliações</p>
+                <h3 className={`text-3xl font-bold mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {totalEvaluations}
+                </h3>
+              </div>
+              <BarChart3 className="w-12 h-12 text-orange-600" />
+            </div>
+          </div>
+
+          <div className={`rounded-lg p-6 ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Avaliação Média</p>
+                <h3 className={`text-3xl font-bold mt-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {averageRating}/5
+                </h3>
+              </div>
+              <TrendingUp className="w-12 h-12 text-orange-600" />
+            </div>
+          </div>
+        </div>
+
         <div className={`mb-8 flex items-center gap-3 px-4 py-3 rounded-lg border-2 ${
           isDark
             ? 'bg-gray-800 border-gray-700'
@@ -221,7 +363,6 @@ export const InstructorDashboard = () => {
           />
         </div>
 
-        {/* Students Grid */}
         {loading ? (
           <div className="text-center py-12">
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -243,7 +384,6 @@ export const InstructorDashboard = () => {
                   isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
                 }`}
               >
-                {/* Cabeçalho do Aluno */}
                 <div className="mb-4">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -255,28 +395,32 @@ export const InstructorDashboard = () => {
                       </p>
                     </div>
                     <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-                      isDark ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'
+                      isDark ? 'bg-orange-900 text-orange-200' : 'bg-orange-100 text-orange-800'
                     }`}>
-                      Nível {student.level || 1}
+                      Nível {student.level}
                     </div>
                   </div>
 
-                  {/* Informações */}
                   <div className={`p-3 rounded-lg mb-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                    <p className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      XP Total: <span className="font-bold text-orange-600">{student.totalXP}</span>
+                    </p>
+                    <p className={`text-xs mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Cursos: <span className="font-bold text-orange-600">{student.coursesCompleted}</span>
+                    </p>
                     <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      XP Total: <span className="font-bold text-blue-600">{student.totalXP || 0}</span>
+                      Horas: <span className="font-bold text-orange-600">{student.hoursLearned}h</span>
                     </p>
                   </div>
                 </div>
 
-                {/* Botões */}
                 <div className="space-y-2">
                   <button
                     onClick={() => handleOpenEvaluation(student)}
                     className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                       isDark
-                        ? 'bg-blue-900 text-blue-200 hover:bg-blue-800'
-                        : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+                        ? 'bg-orange-900 text-orange-200 hover:bg-orange-800'
+                        : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
                     }`}
                   >
                     <Eye className="w-4 h-4" />
@@ -296,7 +440,6 @@ export const InstructorDashboard = () => {
         )}
       </div>
 
-      {/* Modal de Visualização de Avaliações */}
       {showViewModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className={`rounded-t-lg sm:rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto ${
@@ -433,7 +576,6 @@ export const InstructorDashboard = () => {
         </div>
       )}
 
-      {/* Modal de Avaliação */}
       {showEvaluationModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
           <div className={`rounded-t-lg sm:rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto ${
@@ -548,6 +690,15 @@ export const InstructorDashboard = () => {
           </div>
         </div>
       )}
+
+      {showStudentsManager && (
+        <InstructorStudentsManager onClose={() => setShowStudentsManager(false)} />
+      )}
+
+      <InvitationModal 
+        isOpen={showInvitationModal} 
+        onClose={() => setShowInvitationModal(false)} 
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCourses } from '../contexts/CoursesContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useStudent } from '../contexts/StudentContext';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Search, Star, Users, Clock, PlayCircle, CheckCircle, X } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Search, Star, Users, Clock, PlayCircle, CheckCircle, X } from 'lucide-r
 export const AulasPage = () => {
   const { isDark } = useTheme();
   const { courses } = useCourses();
-  const { user } = useAuth();
+  const { user } = useStudent();
   const navigate = useNavigate();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');

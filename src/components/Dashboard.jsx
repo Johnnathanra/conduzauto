@@ -1,13 +1,13 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useStudent } from '../contexts/StudentContext';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { LogOut, Star, Zap, BookOpen, Clock } from 'lucide-react';
 
 export const Dashboard = () => {
   const { isDark } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logoutUser } = useStudent();
   const navigate = useNavigate();
 
   if (!user) {
@@ -16,7 +16,8 @@ export const Dashboard = () => {
   }
 
   const handleLogout = () => {
-    logout();
+    console.log('🚪 [Dashboard] Fazendo logout do aluno');
+    logoutUser();
     navigate('/');
   };
 

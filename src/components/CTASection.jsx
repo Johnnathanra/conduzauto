@@ -17,7 +17,7 @@ export const CTASection = () => {
         </p>
 
         <Link 
-          to="/auth"
+          to="/signup"
           onClick={() => sessionStorage.setItem('authMode', 'signup')}
           className="inline-flex bg-white hover:bg-gray-100 text-orange-600 font-bold py-4 px-9 sm:py-4 sm:px-15 rounded-lg items-center justify-center gap-1 text-sm sm:text-base transition-all mb-7"
         >

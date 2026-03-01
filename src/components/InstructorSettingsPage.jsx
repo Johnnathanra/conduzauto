@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useInstructor } from '../contexts/InstructorContext';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
 import { InstructorSidebar } from './InstructorSidebar';
 import { LogOut, User, Lock, Bell, Moon, Globe, Trash2, Download, HelpCircle, MessageSquare, X, Check } from 'lucide-react';
 
@@ -38,43 +37,60 @@ export const InstructorSettingsPage = () => {
   }
 
   const handleLogout = () => {
+    console.log('🚪 [InstructorSettingsPage] Fazendo logout');
     logoutInstructor();
     navigate('/');
   };
 
   const handleDeleteAccount = async () => {
-  setLoading(true);
-  try {
-    await api.delete('/instructor/delete-account');
-    logoutInstructor();
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem('conduzauto_instrutor_token');
+      console.log('🗑️ [InstructorSettingsPage] Deletando conta do instrutor...');
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/instructor/delete-account`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-    // Limpar localStorage - Token e Instructor
-    localStorage.removeItem('instructor_token');
-    localStorage.removeItem('instructor_user');
-
-    // ✅ Limpar dados de login salvos (Email e Senha encriptada)
-    localStorage.removeItem('instructor_remember_email');
-    localStorage.removeItem('instructor_remember_password');
-    localStorage.removeItem('instructor_remember_me');
-
-    // Limpar outros dados
-    localStorage.removeItem('instructor_email');
-    localStorage.removeItem('instructor_password');
-    localStorage.removeItem('instructor_remember_time');
-
-    setShowDeleteModal(false);
-    setSuccessMessage('✅ Conta deletada com sucesso! Todos os dados foram removidos.');
-    setShowSuccessModal(true);
-
-    // ✅ Recarregar imediatamente (sem delay)
-    window.location.href = '/';
-  } catch (err) {
-  console.error('Erro ao deletar:', err);
-    setSuccessMessage('❌ Erro ao deletar a conta. Tente novamente.');
-    setShowSuccessModal(true);
-  }
-  setLoading(false);
-};
+      if (response.ok) {
+        console.log('✅ [InstructorSettingsPage] Conta deletada com sucesso');
+        
+        // 🔴 NOVO: Remover dados de "manter-me logado" do localStorage (INSTRUTOR)
+        localStorage.removeItem('conduzauto_instrutor_remember_email');
+        localStorage.removeItem('conduzauto_instrutor_remember_password');
+        localStorage.removeItem('conduzauto_instrutor_remember_me');
+        console.log('🗑️ [InstructorSettingsPage] Dados de "manter-me logado" removidos');
+        
+        // Limpar sessionStorage
+        sessionStorage.removeItem('conduzauto_instrutor_token');
+        sessionStorage.removeItem('conduzauto_instrutor_email');
+        sessionStorage.removeItem('conduzauto_instrutor_password');
+        console.log('🗑️ [InstructorSettingsPage] sessionStorage limpo');
+        
+        setShowDeleteModal(false);
+        setShowSuccessModal(true);
+        setSuccessMessage('✅ Conta deletada com sucesso! Todos os dados foram removidos.');
+        
+        setTimeout(() => {
+          logoutInstructor();
+          navigate('/');
+        }, 2000);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ [InstructorSettingsPage] Erro ao deletar conta:', errorData);
+        setShowDeleteModal(false);
+        setSuccessMessage('❌ Erro ao deletar a conta. Tente novamente.');
+        setShowSuccessModal(true);
+      }
+    } catch (error) {
+      console.error('❌ [InstructorSettingsPage] Erro na requisição:', error);
+      setShowDeleteModal(false);
+      setSuccessMessage('❌ Erro ao conectar com o servidor');
+      setShowSuccessModal(true);
+    }
+    setLoading(false);
+  };
 
   const handleSaveProfile = () => {
     setSuccessMessage(`✅ Perfil atualizado!\nNome: ${profileName}\nEmail: ${profileEmail}\nBiografia: ${profileBio}`);
@@ -446,7 +462,7 @@ export const InstructorSettingsPage = () => {
                 </div>
               )}
 
-              {/* Logout */}
+              {/* Logout e Delete Account */}
               <div className="mt-8 flex gap-4">
                 <button
                   onClick={handleLogout}

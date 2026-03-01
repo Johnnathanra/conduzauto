@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Menu, X, Home, BookOpen, Gamepad2, BarChart3, Settings, LogOut, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useStudent } from '../contexts/StudentContext';
 
 export const Sidebar = () => {
   const { isDark, toggleTheme } = useTheme();
-  const { logout } = useAuth();
+  const { logoutUser } = useStudent();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   
@@ -19,7 +19,8 @@ export const Sidebar = () => {
   ];
 
   const handleLogout = () => {
-    logout();
+    console.log('🚪 [Sidebar] Fazendo logout do aluno');
+    logoutUser();
     navigate('/');
   };
 

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useStudent } from '../contexts/StudentContext';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
 import { Sidebar } from './Sidebar';
 import { LogOut, User, Lock, Bell, Moon, Globe, Trash2, Download, HelpCircle, MessageSquare, X, Check } from 'lucide-react';
 
 export const ConfiguracoesPage = () => {
   const { isDark, toggleTheme } = useTheme();
-  const { user, logout } = useAuth();
+  const { user, logoutUser } =  useStudent();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('perfil');
@@ -37,42 +36,60 @@ export const ConfiguracoesPage = () => {
   }
 
   const handleLogout = () => {
-    logout();
+    console.log('🚪 [ConfiguracoesPage] Fazendo logout do aluno');
+    logoutUser();
     navigate('/');
   };
 
   const handleDeleteAccount = async () => {
-  setLoading(true);
-  try {
-    await api.delete('/auth/delete-account');
-    logout();
-    
-    // Limpar localStorage - Token e User
-    localStorage.removeItem('conduzauto_token');
-    localStorage.removeItem('conduzauto_user');
-    
-    // ✅ Limpar dados de login salvos (Email e Senha encriptada)
-    localStorage.removeItem('conduzauto_remember_email');
-    localStorage.removeItem('conduzauto_remember_password');
-    localStorage.removeItem('conduzauto_remember_me');
-    
-    // Limpar outros dados
-    localStorage.removeItem('conduzauto_email');
-    localStorage.removeItem('conduzauto_password');
-    localStorage.removeItem('conduzauto_remember_time');
-    
-    setShowDeleteModal(false);
-    setSuccessMessage('✅ Conta deletada com sucesso! Todos os dados foram removidos.');
-    setShowSuccessModal(true);
-    
-    setTimeout(() => navigate('/'), 2000);
-  } catch (err) {
-    console.error('Erro ao deletar:', err);
-    setSuccessMessage('❌ Erro ao deletar a conta. Tente novamente.');
-    setShowSuccessModal(true);
-  }
-  setLoading(false);
-};
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem('conduzauto_aluno_token');
+      console.log('🗑️ [ConfiguracoesPage] Deletando conta...');
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/delete-account`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        console.log('✅ [ConfiguracoesPage] Conta deletada com sucesso');
+        
+        // 🔴 NOVO: Remover dados de "manter-me logado"
+        localStorage.removeItem('conduzauto_aluno_remember_email');
+        localStorage.removeItem('conduzauto_aluno_remember_password');
+        localStorage.removeItem('conduzauto_aluno_remember_me');
+        console.log('🗑️ [ConfiguracoesPage] Dados de "manter-me logado" removidos');
+        
+        // Limpar sessionStorage
+        sessionStorage.removeItem('conduzauto_aluno_token');
+        sessionStorage.removeItem('conduzauto_email');
+        sessionStorage.removeItem('conduzauto_password');
+        console.log('🗑️ [ConfiguracoesPage] sessionStorage limpo');
+        
+        setShowDeleteModal(false);
+        setShowSuccessModal(true);
+        setSuccessMessage('✅ Conta deletada com sucesso! Todos os dados foram removidos.');
+        
+        setTimeout(() => {
+          logoutUser();
+          navigate('/');
+        }, 2000);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ [ConfiguracoesPage] Erro ao deletar conta:', errorData);
+        setShowDeleteModal(false);
+        setSuccessMessage('❌ Erro ao deletar a conta. Tente novamente.');
+        setShowSuccessModal(true);
+      }
+    } catch (error) {
+      console.error('❌ [ConfiguracoesPage] Erro na requisição:', error);
+      setShowDeleteModal(false);
+      setSuccessMessage('❌ Erro ao conectar com o servidor');
+      setShowSuccessModal(true);
+    }
+    setLoading(false);
+  };
 
   const handleSaveProfile = () => {
     setSuccessMessage(`✅ Perfil atualizado!\nNome: ${profileName}\nEmail: ${profileEmail}`);
@@ -430,7 +447,7 @@ export const ConfiguracoesPage = () => {
                 </div>
               )}
 
-              {/* Logout */}
+              {/* Logout e Delete Account */}
               <div className="mt-8 flex gap-4">
                 <button
                   onClick={handleLogout}

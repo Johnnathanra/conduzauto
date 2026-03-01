@@ -6,59 +6,60 @@ import { Eye, EyeOff } from 'lucide-react';
 
 // Funções de encriptação/desencriptação com Base64
 const encryptData = (data) => {
-  return btoa(data); // Converte para Base64
+  return btoa(data);
 };
 
 const decryptData = (encryptedData) => {
   try {
-    return atob(encryptedData); // Converte de Base64
+    return atob(encryptedData);
   } catch (e) {
     return '';
   }
 };
 
 export const InstructorAuthPage = () => {
-  const authMode = sessionStorage.getItem('authMode') || 'login';
-  const [isLogin, setIsLogin] = useState(authMode === 'login');
+  // 🔴 CARREGAR DADOS SALVOS IMEDIATAMENTE
+  const savedEmail = localStorage.getItem('conduzauto_instrutor_remember_email');
+  const savedPassword = localStorage.getItem('conduzauto_instrutor_remember_password');
+  const wasRemembered = localStorage.getItem('conduzauto_instrutor_remember_me');
+
+  const initialEmail = (savedEmail && wasRemembered === 'true') ? savedEmail : '';
+  const initialPassword = (savedPassword && wasRemembered === 'true') ? decryptData(savedPassword) : '';
+  const initialRememberMe = (wasRemembered === 'true') ? true : false;
+
+  // ESTADOS - inicializados com os valores carregados
+  // 🔴 COMEÇA COM LOGIN (true)
+  const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(initialEmail);
+  const [password, setPassword] = useState(initialPassword);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [bio, setBio] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(initialRememberMe);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { loginInstructor, registerInstructor } = useInstructor();
+  const { loginInstructor, registerInstructor, error: contextError, clearError } = useInstructor();
   const navigate = useNavigate();
   const { isDark } = useTheme();
 
-  // Carregar email e senha salvos ao iniciar (apenas se foi marcado "manter-me logado")
+  // Sincronizar erro do contexto com o estado local
   useEffect(() => {
-    sessionStorage.removeItem('authMode');
-    
-    // Carregar dados salvos apenas no modo login
-    if (isLogin) {
-      const savedEmail = localStorage.getItem('instructor_remember_email');
-      const savedPassword = localStorage.getItem('instructor_remember_password');
-      const wasRemembered = localStorage.getItem('instructor_remember_me');
-      
-      if (savedEmail && wasRemembered === 'true') {
-        setEmail(savedEmail);
-        
-        // Desencriptar senha
-        if (savedPassword) {
-          const decryptedPassword = decryptData(savedPassword);
-          setPassword(decryptedPassword);
+    if (contextError) {
+      console.log('📢 [InstructorAuthPage] Sincronizando erro do contexto:', contextError);
+      const errorMessage = `❌ ${contextError}`;
+      setError(prevError => {
+        if (prevError !== errorMessage) {
+          console.log('🔄 Atualizando erro na página');
+          return errorMessage;
         }
-        
-        setRememberMe(true);
-      }
+        return prevError;
+      });
     }
-  }, [isLogin]);
+  }, [contextError]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -69,23 +70,42 @@ export const InstructorAuthPage = () => {
     const result = await loginInstructor(email, password);
 
     if (result.success) {
-      // Se marcou "manter-me logado", salvar email e senha encriptada
+      console.log('✅ Login bem-sucedido (instrutor). rememberMe:', rememberMe);
+
       if (rememberMe) {
-        localStorage.setItem('instructor_remember_email', email);
-        localStorage.setItem('instructor_remember_password', encryptData(password));
-        localStorage.setItem('instructor_remember_me', 'true');
+        try {
+          console.log('🔍 Tentando salvar dados...');
+          localStorage.setItem('conduzauto_instrutor_remember_email', email);
+          console.log('✅ Email salvo');
+
+          localStorage.setItem('conduzauto_instrutor_remember_password', encryptData(password));
+          console.log('✅ Password salvo');
+
+          localStorage.setItem('conduzauto_instrutor_remember_me', 'true');
+          console.log('✅ RememberMe salvo');
+
+          console.log('💾 [InstructorAuthPage] Todos os dados salvos com sucesso!');
+        } catch (err) {
+          console.error('❌ [InstructorAuthPage] Erro ao salvar em localStorage:', err);
+        }
       } else {
-        // Se desmarcou, limpar dados salvos
-        localStorage.removeItem('instructor_remember_email');
-        localStorage.removeItem('instructor_remember_password');
-        localStorage.removeItem('instructor_remember_me');
+        try {
+          localStorage.removeItem('conduzauto_instrutor_remember_email');
+          localStorage.removeItem('conduzauto_instrutor_remember_password');
+          localStorage.removeItem('conduzauto_instrutor_remember_me');
+          console.log('🗑️ [InstructorAuthPage] Dados de "manter-me logado" removidos');
+        } catch (err) {
+          console.error('❌ [InstructorAuthPage] Erro ao remover de localStorage:', err);
+        }
       }
 
       setSuccess('✅ Login realizado com sucesso!');
       setPassword('');
       setTimeout(() => navigate('/instructor/dashboard'), 100);
     } else {
-      setError(`❌ ${result.error}`);
+      console.log('❌ Login falhou');
+      setPassword('');
+      setConfirmPassword('');
     }
 
     setLoading(false);
@@ -130,9 +150,17 @@ export const InstructorAuthPage = () => {
       setConfirmPassword('');
       setBio('');
       setRememberMe(false);
+
+      // Limpar dados ao registrar
+      localStorage.removeItem('conduzauto_instrutor_remember_email');
+      localStorage.removeItem('conduzauto_instrutor_remember_password');
+      localStorage.removeItem('conduzauto_instrutor_remember_me');
+      console.log('🗑️ [InstructorAuthPage] Dados removidos após cadastro');
+
       setTimeout(() => navigate('/instructor/dashboard'), 100);
     } else {
-      setError(`❌ ${result.error}`);
+      setPassword('');
+      setConfirmPassword('');
     }
 
     setLoading(false);
@@ -148,6 +176,7 @@ export const InstructorAuthPage = () => {
     setConfirmPassword('');
     setBio('');
     setRememberMe(false);
+    clearError();
   };
 
   const inputField = `w-full px-4 py-2 rounded-lg border-2 ${
@@ -349,4 +378,3 @@ export const InstructorAuthPage = () => {
 };
 
 export default InstructorAuthPage;
-

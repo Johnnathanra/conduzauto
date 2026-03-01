@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useInstructor } from '../contexts/InstructorContext';
-import { useNavigate } from 'react-router-dom';
-import { Menu, X, BarChart3, Users, Settings, LogOut, Moon, Sun } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, BarChart3, Users, Settings, LogOut, Moon, Sun, Ticket } from 'lucide-react';
 
 export const InstructorSidebar = () => {
   const { isDark, toggleTheme } = useTheme();
   const { logoutInstructor } = useInstructor();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
 
   const menuItems = [
     { icon: <BarChart3 className="w-6 h-6" />, label: 'Dashboard', path: '/instructor/dashboard' },
     { icon: <Users className="w-6 h-6" />, label: 'Alunos', path: '/instructor/students' },
+    { icon: <Ticket className="w-6 h-6" />, label: 'Convites', path: '/instructor/invites' },
     { icon: <Settings className="w-6 h-6" />, label: 'Configurações', path: '/instructor/settings' },
   ];
 
@@ -20,6 +22,8 @@ export const InstructorSidebar = () => {
     logoutInstructor();
     navigate('/instructor/auth');
   };
+
+  const isActive = (path) => location.pathname === path;
 
   return (
     <>
@@ -63,7 +67,11 @@ export const InstructorSidebar = () => {
                 setOpen(false);
               }}
               className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-colors ${
-                isDark
+                isActive(item.path)
+                  ? isDark
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-orange-600 text-white'
+                  : isDark
                   ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
                   : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
               }`}

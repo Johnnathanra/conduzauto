@@ -32,13 +32,13 @@ Estruturado para iniciantes e motoristas experientes que querem se aprimorar.
             {/* CTA Button */}
             <div className="pt-2 sm:pt-4 w-full md:w-auto flex justify-center md:justify-start">
               <Link 
-                to="/auth"
-                onClick={() => sessionStorage.setItem('authMode', 'signup')}
-                className="inline-flex bg-orange-600 hover:bg-orange-700 text-white font-bold py-5 px-20 sm:py-5 sm:px-12 rounded-lg items-center gap-3 transition-all hover:shadow-lg text-base sm:text-xl whitespace-nowrap"
-              >
-                Começar Agora
-                <ArrowRight className="w-3 sm:w-5 h-3 sm:h-5" />
-              </Link>
+  to="/signup"
+  onClick={() => sessionStorage.setItem('authMode', 'signup')}
+  className="inline-flex bg-orange-600 hover:bg-orange-700 text-white font-bold py-5 px-20 sm:py-5 sm:px-12 rounded-lg items-center gap-3 transition-all hover:shadow-lg text-base sm:text-xl whitespace-nowrap"
+>
+  Começar Agora
+  <ArrowRight className="w-3 sm:w-5 h-3 sm:h-5" />
+</Link>
             </div>
           </div>
 
