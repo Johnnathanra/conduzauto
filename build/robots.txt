@@ -1,5 +1,0 @@
-@"
-# https://www.robotstxt.org/robotstxt.html
-User-agent: *
-Disallow:
-"@ | Out-File -Encoding UTF8 public/robots.txt
