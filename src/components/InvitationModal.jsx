@@ -7,7 +7,6 @@ const InvitationModal = ({ isOpen, onClose }) => {
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(null);
-  const [deletingCode, setDeletingCode] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -25,8 +24,7 @@ const InvitationModal = ({ isOpen, onClose }) => {
       const token = sessionStorage.getItem('conduzauto_instrutor_token');
       
       if (!token) {
-        console.error('❌ [InvitationModal] Token não encontrado');
-        setSuccessMessage('❌ Erro: Token não encontrado. Faça login novamente.');
+        setSuccessMessage('❌ Erro: Token não encontrado.');
         setShowSuccessModal(true);
         return;
       }
@@ -41,20 +39,13 @@ const InvitationModal = ({ isOpen, onClose }) => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
+      if (!response.ok) throw new Error('Erro ao carregar');
 
       const data = await response.json();
-      console.log('✅ [InvitationModal] Convites carregados:', data.invites);
-      
-      // Filtrar apenas convites ativos
       const activeInvites = (data.invites || []).filter(invite => invite.isActive);
-      console.log(`📊 [InvitationModal] ${activeInvites.length} convite(s) ativo(s) de ${data.invites?.length || 0} total(is)`);
-      
       setInvites(activeInvites);
     } catch (error) {
-      console.error('❌ [InvitationModal] Erro ao carregar convites:', error);
+      console.error('❌ Erro:', error);
       setSuccessMessage('❌ Erro ao carregar convites');
       setShowSuccessModal(true);
     } finally {
@@ -68,7 +59,7 @@ const InvitationModal = ({ isOpen, onClose }) => {
       const token = sessionStorage.getItem('conduzauto_instrutor_token');
       
       if (!token) {
-        setSuccessMessage('❌ Erro: Token não encontrado. Faça login novamente.');
+        setSuccessMessage('❌ Token não encontrado.');
         setShowSuccessModal(true);
         return;
       }
@@ -87,17 +78,15 @@ const InvitationModal = ({ isOpen, onClose }) => {
       const data = await response.json();
 
       if (data.success) {
-        console.log('✅ [InvitationModal] Convite gerado:', data);
-        setSuccessMessage(`✅ Convite gerado com sucesso!\n\n${data.inviteLink}`);
+        setSuccessMessage(`✅ Convite gerado!\n\n${data.inviteLink}`);
         setShowSuccessModal(true);
         loadInvites();
       } else {
-        setSuccessMessage('❌ Erro ao gerar convite: ' + (data.message || 'Tente novamente'));
+        setSuccessMessage('❌ Erro ao gerar convite');
         setShowSuccessModal(true);
       }
     } catch (error) {
-      console.error('❌ [InvitationModal] Erro ao gerar convite:', error);
-      setSuccessMessage('❌ Erro ao conectar com o servidor');
+      setSuccessMessage('❌ Erro ao conectar');
       setShowSuccessModal(true);
     } finally {
       setLoading(false);
@@ -105,7 +94,6 @@ const InvitationModal = ({ isOpen, onClose }) => {
   };
 
   const handleClearInvite = (code) => {
-    // Abrir modal de confirmação
     setConfirmAction(code);
     setShowConfirmModal(true);
   };
@@ -115,18 +103,8 @@ const InvitationModal = ({ isOpen, onClose }) => {
     setShowConfirmModal(false);
 
     try {
-      setDeletingCode(code);
       const token = sessionStorage.getItem('conduzauto_instrutor_token');
       
-      if (!token) {
-        setSuccessMessage('❌ Erro: Token não encontrado. Faça login novamente.');
-        setShowSuccessModal(true);
-        setDeletingCode(null);
-        return;
-      }
-
-      console.log(`🔴 [InvitationModal] Revogando convite com code: ${code}`);
-
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/invites/revoke/${code}`,
         {
@@ -141,24 +119,16 @@ const InvitationModal = ({ isOpen, onClose }) => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        console.log('✅ [InvitationModal] Convite removido com sucesso');
-        setSuccessMessage('✅ Convite removido com sucesso!');
+        setSuccessMessage('✅ Convite removido!');
         setShowSuccessModal(true);
-        
-        // Remover convite da lista localmente
         setInvites(prevInvites => prevInvites.filter(invite => invite.code !== code));
-        console.log('✅ [InvitationModal] Convite removido da lista local');
       } else {
-        console.error('❌ [InvitationModal] Erro ao remover:', data);
-        setSuccessMessage('❌ Erro ao remover convite: ' + (data.message || 'Tente novamente'));
+        setSuccessMessage('❌ Erro ao remover');
         setShowSuccessModal(true);
       }
     } catch (error) {
-      console.error('❌ [InvitationModal] Erro ao remover convite:', error);
-      setSuccessMessage('❌ Erro ao conectar com o servidor');
+      setSuccessMessage('❌ Erro ao conectar');
       setShowSuccessModal(true);
-    } finally {
-      setDeletingCode(null);
     }
   };
 
@@ -168,208 +138,205 @@ const InvitationModal = ({ isOpen, onClose }) => {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  // Função para truncar URL
-  const truncateUrl = (url, length = 40) => {
-    if (url.length > length) {
-      return url.substring(0, length) + '...';
-    }
-    return url;
+  const truncateUrl = (url, length = 25) => {
+    return url.length > length ? url.substring(0, length) + '...' : url;
   };
-
-  // Classes reutilizáveis (padrão ConfiguracoesPage)
-  const modalBackdrop = `fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50`;
-  const modalContent = `${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'} rounded-xl max-w-md w-full p-6 shadow-2xl`;
-  const primaryButton = `bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-all`;
-  const secondaryButton = `${isDark ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} font-bold py-2 px-4 rounded-lg transition-all`;
 
   if (!isOpen) return null;
 
   return (
-    <div className={modalBackdrop} onClick={onClose}>
-      <div className={`rounded-t-lg sm:rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col ${
-        isDark ? 'bg-gray-800' : 'bg-white'
-      }`} onClick={(e) => e.stopPropagation()}>
-        
-        {/* Header Sticky */}
-        <div className={`sticky top-0 z-20 p-4 sm:p-6 border-b ${
+    <div 
+      className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      onClick={onClose}
+    >
+      {/* Modal Principal - SEM fixed, SEM sticky */}
+      <div 
+        className={`w-full sm:w-full sm:max-w-2xl rounded-t-2xl sm:rounded-lg overflow-hidden flex flex-col max-h-[100vh] sm:max-h-[90vh] ${
+          isDark ? 'bg-gray-800' : 'bg-white'
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ===== HEADER (NÃO FIXADO) ===== */}
+        <div className={`flex items-center justify-between px-4 py-3 border-b flex-shrink-0 ${
           isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } flex items-center justify-between`}>
-          <h2 className={`text-lg sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Gerenciar Convites 🎫
+        }`}>
+          <h2 className={`text-lg sm:text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            🎫 Convites
           </h2>
           <button
             onClick={onClose}
-            className={`p-2 ${isDark ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'} rounded-lg transition-colors`}
+            className={`p-2 rounded flex-shrink-0 ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Botão Gerar Sticky */}
-        <div className={`sticky top-16 z-20 p-4 sm:p-6 border-b ${
-          isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
+        {/* ===== BOTÃO GERAR (NÃO FIXADO) ===== */}
+        <div className={`px-4 py-3 border-b flex-shrink-0 ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
           <button
             onClick={generateInvite}
             disabled={loading}
-            className="bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-all whitespace-nowrap"
+            className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2"
           >
-            <Plus className="w-5 h-5" />
-            {loading ? 'Gerando...' : 'Gerar Novo Convite'}
+            <Plus className="w-4 h-4" />
+            Gerar Novo Convite
           </button>
         </div>
 
-        {/* Conteúdo Scrollável */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        {/* ===== DICA (NÃO FIXADA) ===== */}
+        <div className={`px-4 py-2 flex-shrink-0 ${isDark ? 'bg-orange-600' : 'bg-orange-600'}`}>
+          <p className="text-xs sm:text-sm text-white font-medium">
+            💡 Copie e compartilhe com seus alunos
+          </p>
+        </div>
+
+        {/* ===== CONVITES - ÚNICO ELEMENTO SCROLLÁVEL ===== */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
           {invites.length === 0 ? (
-            <div className={`${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} border rounded-lg p-8 text-center`}>
-              <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Nenhum convite gerado ainda. Clique em "Gerar Novo Convite" para começar!
+            <div className={`rounded-lg p-6 text-center ${
+              isDark ? 'bg-gray-700' : 'bg-gray-100'
+            }`}>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                Nenhum convite gerado
               </p>
             </div>
           ) : (
-            <div className="grid gap-4">
-              {invites.map((invite, index) => (
-                <div
-                  key={invite.code}
-                  className={`${isDark ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'} border rounded-lg p-6`}
-                >
-                  {/* Linha principal: Link resumido + Info + Botões */}
-                  <div className="flex flex-col md:flex-row md:items-center gap-4">
-                    {/* Link resumido */}
-                    <div className="flex-1">
-                      <p className={`text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Link do Convite:
-                      </p>
-                      <p className={`font-mono text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                        {truncateUrl(invite.link)}
-                      </p>
-                    </div>
-
-                    {/* Informações: Usos e Expiração */}
-                    <div className="grid grid-cols-2 gap-6 md:gap-8 md:whitespace-nowrap">
-                      <div>
-                        <p className={`text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Usos
-                        </p>
-                        <p className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {invite.usageCount}
-                        </p>
-                      </div>
-                      <div>
-                        <p className={`text-xs font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Expira em
-                        </p>
-                        <p className={`text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {new Date(invite.expiresAt).toLocaleDateString('pt-BR')}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Botões do lado direito */}
-                    <div className="flex gap-2 md:flex-col md:gap-2">
-                      <button
-                        onClick={() => copyToClipboard(invite.link, index)}
-                        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all flex-1 md:flex-initial ${
-                          copied === index
-                            ? 'bg-green-600 text-white'
-                            : `${isDark ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`
-                        }`}
-                        title={copied === index ? 'Copiado!' : 'Copiar link para área de transferência'}
-                        disabled={deletingCode === invite.code}
-                      >
-                        {copied === index ? (
-                          <>
-                            <Check className="w-4 h-4" />
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => handleClearInvite(invite.code)}
-                        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                          deletingCode === invite.code
-                            ? 'bg-orange-600 text-white'
-                            : `${isDark ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-red-100 hover:bg-red-200 text-red-700'}`
-                        }`}
-                        title="Remover este convite"
-                        disabled={deletingCode !== null}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+            invites.map((invite, index) => (
+              <div
+                key={invite.code}
+                className={`rounded-lg p-3 border ${
+                  isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+                }`}
+              >
+                {/* Link */}
+                <div className="mb-2">
+                  <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Link
+                  </p>
+                  <div className={`text-xs p-2 rounded font-mono break-all ${
+                    isDark ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-700'
+                  }`}>
+                    {truncateUrl(invite.link)}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Dica Fixada na Base */}
-        <div className={`sticky bottom-0 z-20 px-4 sm:px-6 py-3 sm:py-4 mx-4 sm:mx-6 mb-4 rounded-lg ${
-          isDark ? 'bg-orange-600' : 'bg-orange-600'
-        }`}>
-          <p className={`text-xs sm:text-sm font-medium ${isDark ? 'text-gray-300' : 'text-white'}`}>
-            💡 <strong>Dica:</strong> Copie o link e compartilhe com seus alunos.
-          </p>
+                {/* Info */}
+                <div className="grid grid-cols-2 gap-2 mb-2 pb-2 border-b border-gray-600">
+                  <div>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Usos
+                    </p>
+                    <p className={`text-lg font-bold ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>
+                      {invite.usageCount}
+                    </p>
+                  </div>
+                  <div>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Expira
+                    </p>
+                    <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {new Date(invite.expiresAt).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Botões */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => copyToClipboard(invite.link, index)}
+                    className={`flex-1 flex items-center justify-center gap-1 py-2 rounded text-xs font-semibold ${
+                      copied === index
+                        ? 'bg-green-600 text-white'
+                        : isDark ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
+                  >
+                    {copied === index ? (
+                      <><Check className="w-3 h-3" /> Copiado</>
+                    ) : (
+                      <><Copy className="w-3 h-3" /> Copiar</>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => handleClearInvite(invite.code)}
+                    className={`flex-1 flex items-center justify-center gap-1 py-2 rounded text-xs font-semibold ${
+                      isDark ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-red-100 hover:bg-red-200 text-red-700'
+                    }`}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Limpar
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Confirm Modal - Padrão ConfiguracoesPage */}
+      {/* ===== MODAL CONFIRMAÇÃO ===== */}
       {showConfirmModal && (
-        <div className={modalBackdrop} onClick={() => setShowConfirmModal(false)}>
-          <div className={modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                🗑️ Limpar Convite?
-              </h3>
-              <button onClick={() => setShowConfirmModal(false)} className={isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}>
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <p className={`mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-              Tem certeza que deseja limpar este convite? Esta ação não pode ser desfeita!
+        <div 
+          className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setShowConfirmModal(false)}
+        >
+          <div 
+            className={`w-full sm:w-full sm:max-w-sm rounded-t-2xl sm:rounded-lg p-4 ${
+              isDark ? 'bg-gray-800' : 'bg-white'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={`text-lg font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              🗑️ Confirmar?
+            </h3>
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              Deseja limpar este convite?
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className={`flex-1 ${secondaryButton}`}
+                className={`flex-1 py-2 rounded font-semibold ${
+                  isDark ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                }`}
               >
-                ❌ Cancelar
+                Cancelar
               </button>
               <button
                 onClick={confirmClearInvite}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-all"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded"
               >
-                ✅ Limpar
+                Limpar
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Success Modal - Padrão ConfiguracoesPage */}
+      {/* ===== MODAL SUCESSO ===== */}
       {showSuccessModal && (
-        <div className={modalBackdrop} onClick={() => setShowSuccessModal(false)}>
-          <div className={modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <Check className="w-6 h-6 text-orange-600" />
-              <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <div 
+          className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div 
+            className={`w-full sm:w-full sm:max-w-sm rounded-t-2xl sm:rounded-lg p-4 max-h-[85vh] overflow-y-auto ${
+              isDark ? 'bg-gray-800' : 'bg-white'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Check className="w-5 h-5 text-orange-600 flex-shrink-0" />
+              <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 Notificação
               </h3>
             </div>
-            <p className={`mb-6 whitespace-pre-line ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            <p className={`text-sm mb-4 whitespace-pre-wrap break-words ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
               {successMessage}
             </p>
             <button
               onClick={() => setShowSuccessModal(false)}
-              className={`w-full ${primaryButton}`}
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 rounded"
             >
-              ✅ OK
+              OK
             </button>
           </div>
         </div>
