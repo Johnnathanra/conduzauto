@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useInstructor } from '../contexts/InstructorContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Star, Eye, Edit, Trash2, Plus, X, LogOut, Users, BarChart3, TrendingUp, Gift, AlertCircle, CheckCircle } from 'lucide-react';
+import { Search, Star, Eye, Edit, Trash2, Plus, X, LogOut, Users, BarChart3, TrendingUp, Gift } from 'lucide-react';
 import InstructorStudentsManager from './InstructorStudentsManager';
 
 export const InstructorDashboard = () => {
