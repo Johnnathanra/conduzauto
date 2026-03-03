@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useStudent } from '../contexts/StudentContext';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { LogOut, Star, Zap, BookOpen, Clock } from 'lucide-react';
+import { LogOut, Star, Zap, BookOpen, Clock, Trash2, AlertCircle } from 'lucide-react';
 
 export const Dashboard = () => {
   const { isDark } = useTheme();
   const { user, logoutUser } = useStudent();
   const navigate = useNavigate();
+  const [removingInstructor, setRemovingInstructor] = useState(false);
+  const [instructorMessage, setInstructorMessage] = useState(null);
+  const [instructorError, setInstructorError] = useState(null);
 
   if (!user) {
     navigate('/auth');
@@ -20,6 +23,58 @@ export const Dashboard = () => {
     logoutUser();
     navigate('/');
   };
+
+  // ========== REMOVER INSTRUTOR ==========
+  const handleRemoveInstructor = async () => {
+    if (!window.confirm('Tem certeza que deseja remover este instrutor?')) {
+      return;
+    }
+
+    try {
+      setRemovingInstructor(true);
+      setInstructorError(null);
+      setInstructorMessage(null);
+
+      const token = localStorage.getItem('studentToken');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
+      console.log('🔓 [Dashboard] Removendo instrutor...');
+
+      const response = await fetch(`${apiUrl}/instructor/remove-instructor`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao remover instrutor');
+      }
+
+      console.log('✅ [Dashboard] Instrutor removido com sucesso');
+      setInstructorMessage('Instrutor removido com sucesso!');
+
+      // Atualizar dados do usuário no localStorage
+      const updatedUser = {
+        ...user,
+        instructorId: null,
+        instructorName: null,
+        instructorEmail: null,
+      };
+      localStorage.setItem('studentUser', JSON.stringify(updatedUser));
+      window.location.reload(); // Recarregar página para atualizar dados
+
+    } catch (error) {
+      console.error('❌ [Dashboard] Erro ao remover instrutor:', error.message);
+      setInstructorError(error.message || 'Erro ao remover instrutor');
+    } finally {
+      setRemovingInstructor(false);
+    }
+  };
+  // =========================================
 
   // Dados zerados para novo aluno
   const userProgress = {
@@ -113,6 +168,59 @@ export const Dashboard = () => {
         {/* Content */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           
+          {/* ========== SEÇÃO DE INSTRUTOR VINCULADO ========== */}
+          {user.instructorId && (
+            <div className={`rounded-xl p-6 ${isDark ? 'bg-gradient-to-r from-blue-900/30 to-blue-800/30 border border-blue-600' : 'bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-600'} shadow-lg mb-8`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    👨‍🏫 Seu Instrutor
+                  </h3>
+                  <p className={`text-lg font-semibold ${isDark ? 'text-blue-200' : 'text-blue-700'}`}>
+                    {user.instructorName}
+                  </p>
+                  <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>
+                    {user.instructorEmail}
+                  </p>
+                </div>
+                <button
+                  onClick={handleRemoveInstructor}
+                  disabled={removingInstructor}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${
+                    removingInstructor
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : `${isDark ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`
+                  }`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {removingInstructor ? 'Removendo...' : 'Remover'}
+                </button>
+              </div>
+
+              {/* Mensagem de Sucesso */}
+              {instructorMessage && (
+                <div className={`mt-4 p-3 rounded-lg ${isDark ? 'bg-green-900/30 border border-green-600' : 'bg-green-50 border border-green-600'}`}>
+                  <p className={`text-sm font-semibold ${isDark ? 'text-green-300' : 'text-green-700'}`}>
+                    ✅ {instructorMessage}
+                  </p>
+                </div>
+              )}
+
+              {/* Mensagem de Erro */}
+              {instructorError && (
+                <div className={`mt-4 p-3 rounded-lg ${isDark ? 'bg-red-900/30 border border-red-600' : 'bg-red-50 border border-red-600'}`}>
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-red-600" />
+                    <p className={`text-sm font-semibold ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                      {instructorError}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {/* ================================================ */}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             

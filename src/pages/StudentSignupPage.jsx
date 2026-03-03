@@ -51,12 +51,12 @@ export default function StudentSignupPage() {
     }
   }, [contextError]);
 
-  // ✅ FUNÇÃO CORRIGIDA: Aceitar o convite
+  // ✅ FUNÇÃO CORRIGIDA: Aceitar o convite e ATUALIZAR O USUÁRIO
   const acceptInvite = async (token) => {
     try {
       if (!inviteState?.inviteCode || !inviteState?.inviteSlug) {
         console.log('⚠️ [StudentSignupPage] Nenhum convite para aceitar');
-        return true;
+        return { success: true, instructorData: null };
       }
 
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -91,17 +91,26 @@ export default function StudentSignupPage() {
       if (!response.ok) {
         console.error('❌ [StudentSignupPage] Erro ao aceitar convite:', data.error);
         console.error('   Erro completo:', data);
-        return false;
+        return { success: false, instructorData: null };
       }
 
       console.log('✅ [StudentSignupPage] Convite aceito com sucesso!');
       console.log('   instructorName:', data.instructorName);
       console.log('   instructorId:', data.instructorId);
-      return true;
+
+      // ✅ RETORNAR DADOS DO INSTRUTOR PARA ATUALIZAR O CONTEXTO
+      return { 
+        success: true, 
+        instructorData: {
+          instructorId: data.instructorId,
+          instructorName: data.instructorName,
+          instructorEmail: data.instructorEmail // Pode vir vazio da API
+        }
+      };
     } catch (error) {
       console.error('❌ [StudentSignupPage] Exceção ao aceitar convite:', error.message);
       console.error('   Stack:', error.stack);
-      return false;
+      return { success: false, instructorData: null };
     }
   };
 
@@ -156,8 +165,31 @@ export default function StudentSignupPage() {
       // ✅ ACEITAR CONVITE APÓS CADASTRO
       if (inviteState?.inviteCode) {
         console.log('🎫 [StudentSignupPage] Processando aceitação do convite...');
-        const inviteAccepted = await acceptInvite(result.token);
-        console.log('🎫 [StudentSignupPage] Resultado da aceitação:', inviteAccepted);
+        const inviteResult = await acceptInvite(result.token);
+        
+        console.log('🎫 [StudentSignupPage] Resultado da aceitação:', inviteResult);
+        
+        // ✅ ATUALIZAR O USUÁRIO NO CONTEXTO COM DADOS DO INSTRUTOR
+        if (inviteResult.success && inviteResult.instructorData) {
+          console.log('👨‍🏫 [StudentSignupPage] Atualizando usuário com dados do instrutor...');
+          const updatedUser = {
+            ...result.user,
+            instructorId: inviteResult.instructorData.instructorId,
+            instructorName: inviteResult.instructorData.instructorName,
+            instructorEmail: inviteResult.instructorData.instructorEmail || result.user.instructorEmail
+          };
+          
+          // ✅ ATUALIZAR NO CONTEXTO
+          // Nota: Você pode precisar adicionar uma função setUser no StudentContext
+          // Por enquanto, vamos apenas recarregar o perfil
+          console.log('👨‍🏫 [StudentSignupPage] Usuário atualizado:', updatedUser);
+          
+          // Salvar no sessionStorage para garantir persistência
+          const token = sessionStorage.getItem('conduzauto_aluno_token');
+          if (token) {
+            sessionStorage.setItem('studentUser', JSON.stringify(updatedUser));
+          }
+        }
       } else {
         console.log('⚠️ [StudentSignupPage] Nenhum convite para processar');
       }
@@ -170,7 +202,10 @@ export default function StudentSignupPage() {
       
       sessionStorage.removeItem('inviteData');
       
-      setTimeout(() => navigate('/dashboard'), 1500);
+      setTimeout(() => {
+        // ✅ RECARREGAR A PÁGINA PARA BUSCAR OS DADOS ATUALIZADOS
+        window.location.href = '/dashboard';
+      }, 1500);
     } else {
       console.log('❌ [StudentSignupPage] Cadastro falhou');
       setPassword('');
@@ -190,19 +225,19 @@ export default function StudentSignupPage() {
         <p className={`text-center text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Preencha os dados abaixo</p>
 
         {/* Banner de convite */}
-{inviteState?.inviteCode && (
-  <div className={`${isDark ? 'bg-orange-900 border-orange-700' : 'bg-orange-100 border-orange-300'} rounded-lg p-4 mb-8`}>
-    <p className={`text-center font-bold text-orange-600 text-4xl mb-2`}>
-      Parabéns!
-    </p>
-    <p className={`text-sm text-center ${isDark ? 'text-orange-200' : 'text-gray-800'} mb-2`}>
-      Você foi convidado por
-    </p>
-    <p className={`text-center font-bold text-orange-600 text-3xl`}>
-      {inviteState.instructorName || 'um instrutor'}
-    </p>
-  </div>
-)}
+        {inviteState?.inviteCode && (
+          <div className={`${isDark ? 'bg-orange-900 border-orange-700' : 'bg-orange-100 border-orange-300'} rounded-lg p-4 mb-8`}>
+            <p className={`text-center font-bold text-orange-600 text-4xl mb-2`}>
+              Parabéns!
+            </p>
+            <p className={`text-sm text-center ${isDark ? 'text-orange-200' : 'text-gray-800'} mb-2`}>
+              Você foi convidado por
+            </p>
+            <p className={`text-center font-bold text-orange-600 text-3xl`}>
+              {inviteState.instructorName || 'um instrutor'}
+            </p>
+          </div>
+        )}
 
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">{error}</div>}
         {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">{success}</div>}

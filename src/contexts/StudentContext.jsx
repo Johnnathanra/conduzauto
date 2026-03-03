@@ -24,6 +24,7 @@ export const StudentProvider = ({ children }) => {
             headers: { Authorization: `Bearer ${savedToken}` }
           });
           console.log('👤 [StudentContext] Perfil carregado:', response.data.name);
+          console.log('👨‍🏫 [StudentContext] Instrutor:', response.data.instructorName || 'nenhum');
           setToken(savedToken);
           setUser(response.data);
           setError(null);
@@ -68,14 +69,29 @@ export const StudentProvider = ({ children }) => {
 
       const res = await apiAluno.post('/auth/register', registrationData);
       const { token: newToken, user: userData } = res.data;
-      console.log('✅ [StudentContext] Aluno registrado:', userData.name);
-      console.log('✅ [StudentContext] Vinculado ao instrutor:', userData.instructor?.name || 'nenhum instrutor');
       
+      console.log('✅ [StudentContext] Aluno registrado:', userData.name);
+      console.log('👨‍🏫 [StudentContext] Dados do instrutor:', {
+        instructorId: userData.instructorId,
+        instructorName: userData.instructorName,
+        instructorEmail: userData.instructorEmail
+      });
+      
+      // ✅ MAPEAR CORRETAMENTE OS DADOS DO INSTRUTOR
+      const userWithInstructor = {
+        ...userData,
+        instructorId: userData.instructorId || null,
+        instructorName: userData.instructorName || null,
+        instructorEmail: userData.instructorEmail || null,
+      };
+
       sessionStorage.setItem(TOKEN_KEY, newToken);
       setToken(newToken);
-      setUser(userData);
+      setUser(userWithInstructor);
       setError(null);
-      return { success: true, token: newToken, user: userData };
+      
+      console.log('✅ [StudentContext] User com instrutor:', userWithInstructor);
+      return { success: true, token: newToken, user: userWithInstructor };
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Erro ao registrar';
       setError(msg);
@@ -96,13 +112,28 @@ export const StudentProvider = ({ children }) => {
       const { token: newToken, user: userData } = res.data;
       
       console.log('✅ [StudentContext] Login bem-sucedido:', userData.name);
+      console.log('👨‍🏫 [StudentContext] Dados do instrutor:', {
+        instructorId: userData.instructorId,
+        instructorName: userData.instructorName,
+        instructorEmail: userData.instructorEmail
+      });
+
+      // ✅ MAPEAR CORRETAMENTE OS DADOS DO INSTRUTOR
+      const userWithInstructor = {
+        ...userData,
+        instructorId: userData.instructorId || null,
+        instructorName: userData.instructorName || null,
+        instructorEmail: userData.instructorEmail || null,
+      };
+
       sessionStorage.setItem(TOKEN_KEY, newToken);
       setToken(newToken);
-      setUser(userData);
+      setUser(userWithInstructor);
       setError(null);
       setLoading(false);
       
-      return { success: true, token: newToken, user: userData };
+      console.log('✅ [StudentContext] User com instrutor:', userWithInstructor);
+      return { success: true, token: newToken, user: userWithInstructor };
     } catch (err) {
       console.error('❌ [StudentContext] Erro no login');
       console.error('❌ Status HTTP:', err.response?.status);
@@ -143,7 +174,6 @@ export const StudentProvider = ({ children }) => {
   const logoutUser = () => {
     console.log('🚪 [StudentContext] Fazendo logout do aluno');
     sessionStorage.removeItem(TOKEN_KEY);
-    // ✅ MANTER DADOS DE "MANTER-ME LOGADO" PARA PRÓXIMOS ACESSOS
     setUser(null);
     setToken(null);
     setError('');
